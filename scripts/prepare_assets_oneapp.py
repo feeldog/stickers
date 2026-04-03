@@ -98,7 +98,7 @@ def main():
             })
 
         sticker_packs.append({
-            "identifier": sanitize_identifier(pack_dir.name),
+            "identifier": str(idx),
             "name": pack_dir.name,
             "publisher": PUBLISHER,
             "tray_image_file": "tray_icon.png",
