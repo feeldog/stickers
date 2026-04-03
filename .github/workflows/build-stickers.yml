@@ -50,6 +50,18 @@ jobs:
         run: |
           python scripts/prepare_assets_oneapp.py
 
+      - name: Create local.properties
+        working-directory: Android
+        run: |
+          if [ -n "$ANDROID_SDK_ROOT" ]; then
+            echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
+          elif [ -n "$ANDROID_HOME" ]; then
+            echo "sdk.dir=$ANDROID_HOME" > local.properties
+          else
+            echo "sdk.dir=/usr/local/lib/android/sdk" > local.properties
+          fi
+          cat local.properties
+
       - name: Build debug APK
         working-directory: Android
         run: |
