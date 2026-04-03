@@ -9,39 +9,54 @@
 apply plugin: 'com.android.application'
 
 android {
-    //the compression of webp file during build causes problem with FileDescriptor in ContentProvider.
+    // The compression of webp file during build causes problem with FileDescriptor in ContentProvider.
     aaptOptions {
         noCompress "webp"
     }
-    compileSdkVersion 30
+
+    // Subido para evitar el warning de compatibilidad antigua en Android moderno
+    compileSdkVersion 35
+
     defaultConfig {
-        applicationId "com.example.samplestickerapp"
+        // IMPORTANTE: no puede empezar con com.example ni com.whatsapp
+        applicationId "com.stickerstelegram.personalapp"
+
         minSdkVersion 15
-        targetSdkVersion 30
+        targetSdkVersion 35
+
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
         def contentProviderAuthority = applicationId + ".stickercontentprovider"
+
         // Creates a placeholder property to use in the manifest.
-        manifestPlaceholders =
-                [contentProviderAuthority: contentProviderAuthority]
+        manifestPlaceholders = [
+                contentProviderAuthority: contentProviderAuthority
+        ]
+
         // Adds a new field for the authority to the BuildConfig class.
-        buildConfigField("String",
+        buildConfigField(
+                "String",
                 "CONTENT_PROVIDER_AUTHORITY",
-                "\"${contentProviderAuthority}\"")
+                "\"${contentProviderAuthority}\""
+        )
     }
+
     buildTypes {
         debug {
             minifyEnabled false
             shrinkResources false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
+
         release {
             minifyEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+
     compileOptions {
         sourceCompatibility = '1.8'
         targetCompatibility = '1.8'
@@ -51,6 +66,8 @@ android {
         exclude 'lib/*/libnative-imagetranscoder.so'
         exclude 'lib/*/libnative-filters.so'
     }
+
+    // Lo dejamos igual para no romper el sample
     namespace 'com.example.samplestickerapp'
 
     // Configures multiple APKs based on ABI.
@@ -86,7 +103,6 @@ private void checkApplicationIdInDebug() {
     }
 }
 
-
 task checkRelease {
     doLast {
         println("checkRelease")
@@ -106,16 +122,18 @@ tasks.whenTaskAdded { task ->
     }
 }
 
-
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
+
     implementation 'androidx.appcompat:appcompat:1.3.1'
     implementation 'com.google.android.material:material:1.4.0'
+    implementation 'androidx.recyclerview:recyclerview:1.2.1'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.0'
+
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test:runner:1.4.0'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
-    implementation 'androidx.recyclerview:recyclerview:1.2.1'
-    implementation 'androidx.constraintlayout:constraintlayout:2.1.0'
+
     def fresco_version = '2.5.0'
     implementation "com.facebook.fresco:fresco:$fresco_version"
     implementation "com.facebook.fresco:webpsupport:$fresco_version"
