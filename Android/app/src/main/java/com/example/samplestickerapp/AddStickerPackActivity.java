@@ -28,20 +28,33 @@ public abstract class AddStickerPackActivity extends BaseActivity {
 
     protected void addStickerPackToWhatsApp(String identifier, String stickerPackName) {
         try {
-            //if neither WhatsApp Consumer or WhatsApp Business is installed, then tell user to install the apps.
-            if (!WhitelistCheck.isWhatsAppConsumerAppInstalled(getPackageManager()) && !WhitelistCheck.isWhatsAppSmbAppInstalled(getPackageManager())) {
+            // if neither WhatsApp Consumer or WhatsApp Business is installed, then tell user to install the apps.
+            if (!WhitelistCheck.isWhatsAppConsumerAppInstalled(getPackageManager())
+                    && !WhitelistCheck.isWhatsAppSmbAppInstalled(getPackageManager())) {
                 Toast.makeText(this, R.string.add_pack_fail_prompt_update_whatsapp, Toast.LENGTH_LONG).show();
                 return;
             }
-            final boolean stickerPackWhitelistedInWhatsAppConsumer = WhitelistCheck.isStickerPackWhitelistedInWhatsAppConsumer(this, identifier);
-            final boolean stickerPackWhitelistedInWhatsAppSmb = WhitelistCheck.isStickerPackWhitelistedInWhatsAppSmb(this, identifier);
+
+            final boolean stickerPackWhitelistedInWhatsAppConsumer =
+                    WhitelistCheck.isStickerPackWhitelistedInWhatsAppConsumer(this, identifier);
+            final boolean stickerPackWhitelistedInWhatsAppSmb =
+                    WhitelistCheck.isStickerPackWhitelistedInWhatsAppSmb(this, identifier);
+
             if (!stickerPackWhitelistedInWhatsAppConsumer && !stickerPackWhitelistedInWhatsAppSmb) {
-                //ask users which app to add the pack to.
+                // ask users which app to add the pack to.
                 launchIntentToAddPackToChooser(identifier, stickerPackName);
             } else if (!stickerPackWhitelistedInWhatsAppConsumer) {
-                launchIntentToAddPackToSpecificPackage(identifier, stickerPackName, WhitelistCheck.CONSUMER_WHATSAPP_PACKAGE_NAME);
+                launchIntentToAddPackToSpecificPackage(
+                        identifier,
+                        stickerPackName,
+                        WhitelistCheck.CONSUMER_WHATSAPP_PACKAGE_NAME
+                );
             } else if (!stickerPackWhitelistedInWhatsAppSmb) {
-                launchIntentToAddPackToSpecificPackage(identifier, stickerPackName, WhitelistCheck.SMB_WHATSAPP_PACKAGE_NAME);
+                launchIntentToAddPackToSpecificPackage(
+                        identifier,
+                        stickerPackName,
+                        WhitelistCheck.SMB_WHATSAPP_PACKAGE_NAME
+                );
             } else {
                 Toast.makeText(this, R.string.add_pack_fail_prompt_update_whatsapp, Toast.LENGTH_LONG).show();
             }
@@ -49,7 +62,6 @@ public abstract class AddStickerPackActivity extends BaseActivity {
             Log.e(TAG, "error adding sticker pack to WhatsApp", e);
             Toast.makeText(this, R.string.add_pack_fail_prompt_update_whatsapp, Toast.LENGTH_LONG).show();
         }
-
     }
 
     private void launchIntentToAddPackToSpecificPackage(String identifier, String stickerPackName, String whatsappPackageName) {
@@ -62,7 +74,8 @@ public abstract class AddStickerPackActivity extends BaseActivity {
         }
     }
 
-    //Handle cases either of WhatsApp are set as default app to handle this intent. We still want users to see both options.
+    // Handle cases either of WhatsApp are set as default app to handle this intent.
+    // We still want users to see both options.
     private void launchIntentToAddPackToChooser(String identifier, String stickerPackName) {
         Intent intent = createIntentToAddStickerPack(identifier, stickerPackName);
         try {
@@ -85,19 +98,40 @@ public abstract class AddStickerPackActivity extends BaseActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+
         if (requestCode == ADD_PACK) {
             if (resultCode == Activity.RESULT_CANCELED) {
                 if (data != null) {
                     final String validationError = data.getStringExtra("validation_error");
+
                     if (validationError != null) {
-                        if (BuildConfig.DEBUG) {
-                            //validation error should be shown to developer only, not users.
-                            MessageDialogFragment.newInstance(R.string.title_validation_error, validationError).show(getSupportFragmentManager(), "validation error");
-                        }
-                        Log.e(TAG, "Validation failed:" + validationError);
+                        // Mostrar SIEMPRE el error real que devuelve WhatsApp
+                        MessageDialogFragment
+                                .newInstance(R.string.title_validation_error, validationError)
+                                .show(getSupportFragmentManager(), "validation_error");
+
+                        Log.e(TAG, "Validation failed: " + validationError);
+                    } else {
+                        // WhatsApp canceló pero no devolvió validation_error
+                        MessageDialogFragment
+                                .newInstance(
+                                        R.string.title_validation_error,
+                                        "WhatsApp rechazó el paquete, pero no devolvió validation_error."
+                                )
+                                .show(getSupportFragmentManager(), "validation_error_empty");
+
+                        Log.e(TAG, "Validation failed but validation_error was null");
                     }
                 } else {
-                    new StickerPackNotAddedMessageFragment().show(getSupportFragmentManager(), "sticker_pack_not_added");
+                    // WhatsApp canceló y no devolvió Intent data
+                    MessageDialogFragment
+                            .newInstance(
+                                    R.string.title_validation_error,
+                                    "WhatsApp devolvió RESULT_CANCELED sin datos."
+                            )
+                            .show(getSupportFragmentManager(), "validation_error_no_data");
+
+                    Log.e(TAG, "RESULT_CANCELED with null data");
                 }
             }
         }
@@ -119,9 +153,12 @@ public abstract class AddStickerPackActivity extends BaseActivity {
         private void launchWhatsAppPlayStorePage() {
             if (getActivity() != null) {
                 final PackageManager packageManager = getActivity().getPackageManager();
-                final boolean whatsAppInstalled = WhitelistCheck.isPackageInstalled(WhitelistCheck.CONSUMER_WHATSAPP_PACKAGE_NAME, packageManager);
-                final boolean smbAppInstalled = WhitelistCheck.isPackageInstalled(WhitelistCheck.SMB_WHATSAPP_PACKAGE_NAME, packageManager);
+                final boolean whatsAppInstalled =
+                        WhitelistCheck.isPackageInstalled(WhitelistCheck.CONSUMER_WHATSAPP_PACKAGE_NAME, packageManager);
+                final boolean smbAppInstalled =
+                        WhitelistCheck.isPackageInstalled(WhitelistCheck.SMB_WHATSAPP_PACKAGE_NAME, packageManager);
                 final String playPackageLinkPrefix = "http://play.google.com/store/apps/details?id=";
+
                 if (whatsAppInstalled && smbAppInstalled) {
                     launchPlayStoreWithUri("https://play.google.com/store/apps/developer?id=WhatsApp+LLC");
                 } else if (whatsAppInstalled) {
