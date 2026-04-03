@@ -12,13 +12,18 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".EntryActivity">
+
+        <activity
+            android:name=".EntryActivity"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <activity android:name=".StickerPackListActivity" />
+
         <activity
             android:name=".StickerPackDetailsActivity"
             android:parentActivityName=".StickerPackListActivity"
@@ -27,6 +32,7 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.example.samplestickerapp.StickerPackListActivity" />
         </activity>
+
         <activity
             android:name=".StickerPackInfoActivity"
             android:label="@string/title_activity_sticker_pack_info"
@@ -45,8 +51,8 @@
             android:readPermission="com.whatsapp.sticker.READ" />
     </application>
 
-    <!-- to be able to query the whitelist status in WhatsApp 
-     https://developer.android.com/training/basics/intents/package-visibility#package-name -->
+    <!-- to be able to query the whitelist status in WhatsApp
+         https://developer.android.com/training/basics/intents/package-visibility#package-name -->
     <queries>
         <package android:name="com.whatsapp" />
         <package android:name="com.whatsapp.w4b" />
