@@ -99,7 +99,7 @@ def main():
 
         sticker_packs.append({
             "identifier": str(idx),
-            "name": pack_dir.name,
+            "name": f"Dave Kidoh • {pack_dir.name}",
             "publisher": PUBLISHER,
             "tray_image_file": "tray_icon.png",
             "image_data_version": "1",
