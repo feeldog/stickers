@@ -11,7 +11,7 @@ STRINGS_XML = Path("Android/app/src/main/res/values/strings.xml")
 
 APP_ID = "com.tuusuario.stickers"
 APP_NAME = "Stickers Telegram"
-PUBLISHER = "Tu Nombre"
+PUBLISHER = "Dave Kidoh"
 
 def sanitize_identifier(text: str) -> str:
     allowed = set("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.- ")
